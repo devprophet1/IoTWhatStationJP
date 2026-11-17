@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#152b3a">
+  <title>Whater Station · Observatorio ambiental</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/time.js" defer></script>
+  <script src="/js/charts.js" defer></script>
+  <script src="/js/dashboard-model.js" defer></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Saltar al contenido</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Whater Station, inicio"><span class="brand-mark" aria-hidden="true">W<span>·</span></span> WHATER STATION</a>
+    <span class="topbar-label">OBSERVATORIO AMBIENTAL</span>
+    <span class="timezone-label">Lima, Perú <span>UTC−5</span></span>
+  </header>
+  <main>
+    <section class="page-heading">
+      <div><p class="eyebrow">MONITOREO IoT / VISTA DIARIA</p><h1>Observatorio ambiental</h1><p class="subtitle">Una visión clara de tus estaciones y su entorno.</p></div>
+      <button id="refresh" class="button secondary" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/></svg>Actualizar</button>
+    </section>
+
+    <section class="device-strip" aria-label="Estado de las lecturas del dispositivo">
+      <div><span class="field-label">Dispositivo de la última lectura</span><strong id="device-id">Sin datos</strong></div>
+      <div><span class="field-label">Última medición · Lima</span><time id="device-last-reading">—</time></div>
+      <div class="device-freshness"><span id="device-status" class="freshness-badge" data-state="empty">Sin mediciones</span><span id="device-status-detail">El estado se basa en las lecturas, no en el navegador.</span></div>
+    </section>
+
+    <div class="controls">
+      <form id="filters" class="filter-panel">
+        <div class="filter-primary">
+          <label>Dispositivo<input id="device" name="device_id" list="devices" placeholder="Todos los dispositivos" maxlength="128" autocomplete="off"><datalist id="devices"></datalist></label>
+          <label>Fecha · Lima<input id="day" name="day" type="date" required></label>
+          <div class="filter-actions"><button class="button primary" type="submit">Aplicar filtros</button><button id="reset" class="text-button" type="button">Limpiar filtros</button></div>
+        </div>
+        <details id="range-filters" class="range-filters"><summary>Rango horario <span>Opcional · UTC−5</span></summary><div class="range-fields"><label>Desde (Lima)<input id="from" name="from" type="datetime-local" step="1"></label><label>Hasta (Lima)<input id="to" name="to" type="datetime-local" step="1"></label></div></details>
+      </form>
+      <nav class="tabs" role="tablist" aria-label="Vistas del observatorio">
+        <button id="tab-resumen" type="button" role="tab" aria-selected="true" aria-controls="panel-resumen" tabindex="0">Resumen</button>
+        <button id="tab-graficas" type="button" role="tab" aria-selected="false" aria-controls="panel-graficas" tabindex="-1">Gráficas</button>
+        <button id="tab-historial" type="button" role="tab" aria-selected="false" aria-controls="panel-historial" tabindex="-1">Historial</button>
+      </nav>
+    </div>
+
+    <div class="status-bar"><p id="status" role="status" aria-live="polite">Cargando el día de Lima…</p><span id="updated">Consulta pendiente</span></div>
+    <section class="period-overview" aria-label="Resumen del periodo seleccionado"><div class="period-totals"><span><strong id="summary-sessions">—</strong> <span id="summary-sessions-label">sesiones seleccionadas</span></span><span><strong id="summary-count">—</strong> <span id="summary-count-label">mediciones</span></span></div><span id="view-mode" class="count">Vista diaria</span></section>
+    <section class="sessions-panel" aria-label="Sesiones del día">
+      <div class="section-caption"><div class="section-title"><h2>Sesiones del día</h2><span id="session-selection-count" class="subtle-count">0 seleccionadas</span></div><div class="session-actions"><button id="select-all" class="text-button" type="button">Seleccionar todas</button><button id="select-none" class="text-button" type="button">Limpiar selección</button></div></div>
+      <div id="sessions-list" class="sessions-list"></div>
+    </section>
+
+    <div id="workspace" tabindex="-1"><div id="measurements" aria-busy="true">
+      <section id="panel-resumen" role="tabpanel" aria-labelledby="tab-resumen" tabindex="0">
+        <div class="section-caption latest-caption"><h2>Última medición</h2><p id="latest-context">Esperando datos</p></div>
+        <div class="metrics">
+          <article class="metric temperature">
+            <div class="metric-label"><h3>Temperatura</h3><span class="metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14.5V5a3 3 0 0 1 6 0v9.5a5 5 0 1 1-6 0Z"/><path d="M12 7v10"/><circle cx="12" cy="18" r="1"/></svg></span></div>
+            <p class="metric-value"><strong id="temperature">—</strong><span class="unit">°C</span></p>
+            <div id="temperature-sparkline" class="sparkline"></div>
+            <dl id="summary-temperature" class="metric-stats"><div><dt>Mín</dt><dd id="temperature-min">—</dd></div><div><dt>Máx</dt><dd id="temperature-max">—</dd></div><div><dt>Prom</dt><dd id="temperature-avg">—</dd></div></dl>
+          </article>
+          <article class="metric humidity">
+            <div class="metric-label"><h3>Humedad relativa</h3><span class="metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-7 7.5-7 12a7 7 0 0 0 14 0c0-4.5-7-12-7-12Z"/><path d="M8 15a4 4 0 0 0 4 4"/></svg></span></div>
+            <p class="metric-value"><strong id="humidity">—</strong><span class="unit">%</span></p>
+            <div id="humidity-sparkline" class="sparkline"></div>
+            <dl id="summary-humidity" class="metric-stats"><div><dt>Mín</dt><dd id="humidity-min">—</dd></div><div><dt>Máx</dt><dd id="humidity-max">—</dd></div><div><dt>Prom</dt><dd id="humidity-avg">—</dd></div></dl>
+          </article>
+          <article class="metric pressure">
+            <div class="metric-label"><h3>Presión</h3><span class="metric-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18a9 9 0 1 1 16 0M12 4v2M5 8l2 1M19 8l-2 1M12 14l4-4M8 20h8"/><circle cx="12" cy="14" r="2"/></svg></span></div>
+            <p class="metric-value"><strong id="pressure">—</strong><span class="unit sensor-unit">unidad del sensor</span></p>
+            <div id="pressure-sparkline" class="sparkline"></div>
+            <dl id="summary-pressure" class="metric-stats"><div><dt>Mín</dt><dd id="pressure-min">—</dd></div><div><dt>Máx</dt><dd id="pressure-max">—</dd></div><div><dt>Prom</dt><dd id="pressure-avg">—</dd></div></dl>
+          </article>
+        </div>
+        <p class="period-note">Mínimo, máximo y promedio de todas las lecturas del periodo y las sesiones seleccionadas.</p>
+        <article class="chart-panel combined-panel">
+          <div class="chart-heading"><div><h2>Evolución ambiental combinada</h2><p class="chart-explanation">Un panel por variable con el mismo eje de tiempo · Hora de Lima · Los huecos son intervalos sin datos</p></div></div>
+          <fieldset id="metric-toggles" class="metric-toggles"><legend class="sr-only">Variables visibles</legend><label class="metric-choice metric-temp"><input type="checkbox" id="show-temperature" checked>Temperatura °C</label><label class="metric-choice metric-humidity"><input type="checkbox" id="show-humidity" checked>Humedad %</label><label class="metric-choice metric-pressure"><input type="checkbox" id="show-pressure" checked>Presión · sensor</label></fieldset>
+          <div id="combined-chart" class="chart"></div>
+        </article>
+        <button id="open-graphs" class="text-button next-view" type="button">Explorar gráficas individuales →</button>
+      </section>
+
+      <section id="panel-graficas" role="tabpanel" aria-labelledby="tab-graficas" tabindex="0" hidden>
+        <div class="section-caption"><div><h2>Evolución por métrica</h2><p>Cada sesión conserva sus puntos · Hora de Lima (UTC−5)</p></div><span id="count" class="count">0 mediciones</span></div>
+        <div id="legend" class="legend" aria-label="Dispositivos representados"></div>
+        <article class="chart-panel"><div class="chart-heading"><h3 class="metric-temp">Temperatura</h3><span>°C</span></div><div id="temperature-chart" class="chart"></div></article>
+        <article class="chart-panel"><div class="chart-heading"><h3 class="metric-humidity">Humedad relativa</h3><span>%</span></div><div id="humidity-chart" class="chart"></div></article>
+        <article class="chart-panel"><div class="chart-heading"><h3 class="metric-pressure">Presión atmosférica</h3><span>Unidad del sensor</span></div><div id="pressure-chart" class="chart"></div></article>
+      </section>
+
+      <section id="panel-historial" role="tabpanel" aria-labelledby="tab-historial" tabindex="0" hidden>
+        <section class="data-panel"><div class="history-heading"><div><h2>Historial de mediciones</h2><p>Periodo seleccionado · Más recientes primero · Horario de Lima</p></div><label>Filas por página<select id="limit" name="limit"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option><option value="1000">1000</option></select></label></div><div class="table-scroll" tabindex="0" role="region" aria-label="Tabla de mediciones desplazable"><table><caption class="sr-only">Mediciones en orden descendente, horario de Lima</caption><thead><tr><th scope="col">Fecha y hora · Lima</th><th scope="col">Dispositivo</th><th scope="col">Sesión</th><th scope="col">Temperatura °C</th><th scope="col">Humedad %</th><th scope="col">Presión · sensor</th></tr></thead><tbody id="readings-table"></tbody></table></div><nav class="table-pagination" aria-label="Páginas de mediciones"><button id="table-prev" class="button secondary" type="button">Anterior</button><span id="table-page">Página 1 de 1</span><button id="table-next" class="button secondary" type="button">Siguiente</button></nav></section>
+      </section>
+    </div></div>
+    <footer><span>WHATER STATION · OBSERVATORIO IoT</span><span>America/Lima · UTC−5</span></footer>
+  </main>
+</body>
+</html>

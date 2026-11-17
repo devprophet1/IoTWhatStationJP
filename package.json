@@ -1,0 +1,16 @@
+{
+  "name": "whater-station",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Base IoT con Express, EMQX Cloud, Supabase y frontend estático",
+  "scripts": {
+    "start": "node --env-file=.env backend/src/server.js",
+    "test": "node --test backend/test/*.test.js"
+  },
+  "engines": { "node": "24.x" },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "express": "^5.0.0",
+    "mqtt": "^5.0.0"
+  }
+}
