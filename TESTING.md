@@ -86,3 +86,37 @@ otra ruta del navegador. Las pruebas cierran sus servidores y navegadores al ter
 
 La integración física del firmware y el despliegue en Vercel no forman parte de
 esta mejora visual. No se cambió su configuración. Detalles de UI en [docs/UI.md](docs/UI.md).
+
+## Corrección posterior: HTTP 400 en Vercel
+
+Se comprobó la URL publicada: `/api/health` responde HTTP 200, mientras que las
+rutas de datos devuelven HTTP 400 con `Parámetro desconocido o repetido`. El error
+ocurre antes de consultar Supabase. Un Chrome limpio no reprodujo el mensaje
+`Receiving end does not exist`; ese aviso no explica el fallo de las rutas.
+
+La herramienta oficial `@vercel/routing-utils` confirmó la transformación de la
+regla anterior `/api/:path*` → `/api` en destino `/api?path=$1`. El parámetro de
+captura se incorporaba a la consulta y nuestra validación lo rechazaba.
+
+Se corrigió `vercel.json` con cinco rewrites estáticos, uno por endpoint, sin
+capturas ni parámetros adicionales. Se añadió un favicon SVG y su referencia en
+el HTML. El código de validación, las credenciales y el consumidor no se modificaron.
+
+`backend/test/vercel.integration.cjs` reprodujo el 400 anterior y verificó los cinco
+endpoints con HTTP 200 después de la transformación oficial de la configuración
+corregida. Las consultas desconocidas/repetidas o límites inválidos siguen
+produciendo HTTP 400. El SVG se sirve con HTTP 200 y MIME correcto. Las respuestas
+de datos de esta prueba están simuladas en memoria: no hay escrituras en Supabase.
+La suite de regresión sigue con **35 pruebas aprobadas**.
+
+Reproducción (herramienta de QA temporal, sin dependencia de producción):
+
+```powershell
+$taskRoutes = Join-Path $env:TEMP 'whater-vercel-routing-check'
+npm.cmd install --prefix $taskRoutes --no-save --package-lock=false --ignore-scripts @vercel/routing-utils
+$env:WHATER_ROUTING_UTILS = Join-Path $taskRoutes 'node_modules/@vercel/routing-utils'
+node backend/test/vercel.integration.cjs
+```
+
+La corrección está en los archivos locales. Su verificación en la URL pública
+requiere desplegar el nuevo commit; redesplegar el commit anterior no la incluye.

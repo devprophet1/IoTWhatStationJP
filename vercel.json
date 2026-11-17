@@ -4,6 +4,10 @@
   "buildCommand": "",
   "outputDirectory": "frontend",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" }
+    { "source": "/api/health", "destination": "/api" },
+    { "source": "/api/readings", "destination": "/api" },
+    { "source": "/api/sesiones", "destination": "/api" },
+    { "source": "/api/mediciones", "destination": "/api" },
+    { "source": "/api/resumen", "destination": "/api" }
   ]
 }

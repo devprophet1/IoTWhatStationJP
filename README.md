@@ -107,6 +107,12 @@ Se conserva `vercel.json`: raíz del repositorio, preset Other y salida estátic
 iniciar MQTT o timers. El consumidor debe ejecutarse como proceso persistente
 fuera de Vercel. No se agregaron servicios ni dependencias de producción.
 
+Las cinco rutas de API tienen rewrites explícitos hacia `/api` en `vercel.json`.
+No usar `/api/:path*` con destino `/api`: Vercel convierte la captura no utilizada
+en `?path=...`, y ese parámetro adicional es rechazado por la validación estricta.
+Al añadir otro endpoint hay que añadir también su rewrite explícito. Cualquier
+cambio en esta configuración requiere subir el commit y desplegarlo de nuevo.
+
 Configurar las variables privadas de Supabase en Vercel. El navegador solo utiliza
 la API HTTP: nunca recibe la clave `service_role` ni credenciales MQTT. `.env` queda
 excluido de Git. El dashboard no incorpora autenticación de usuarios.
